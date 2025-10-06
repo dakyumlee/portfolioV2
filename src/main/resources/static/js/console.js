@@ -9,6 +9,13 @@ window.addEventListener('DOMContentLoaded', () => {
         bootSequenceComplete = true;
     }, 2200);
     
+    document.querySelectorAll('.project-card[data-project-id]').forEach(card => {
+        card.addEventListener('click', function() {
+            const projectId = this.getAttribute('data-project-id');
+            runModule(projectId);
+        });
+    });
+    
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             e.preventDefault();

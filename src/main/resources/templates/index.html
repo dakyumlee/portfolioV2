@@ -50,7 +50,7 @@
             
             <div class="projects-layout">
                 <div class="projects-grid">
-                    <div th:each="project : ${projects}" class="project-card" th:onclick="|runModule(${project.id})|">
+                    <div th:each="project : ${projects}" class="project-card" th:attr="data-project-id=${project.id}">
                         <div class="card-header">
                             <h3 class="card-title" th:text="${project.title}">Project Title</h3>
                             <span class="card-status">●</span>
@@ -91,12 +91,12 @@ Ready for module execution...
             <form th:action="@{/contact}" method="post" class="terminal-form">
                 <div class="form-group">
                     <label class="form-label">$ whoami</label>
-                    <input name="name" class="form-input" placeholder="Your name" required>
+                    <input name="name" class="form-input" placeholder="Your name" required />
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">$ echo $EMAIL</label>
-                    <input name="email" type="email" class="form-input" placeholder="your.email@domain.com" required>
+                    <input name="email" type="email" class="form-input" placeholder="your.email@domain.com" required />
                 </div>
                 
                 <div class="form-group">
@@ -105,7 +105,7 @@ Ready for module execution...
                 </div>
                 
                 <button type="submit" class="btn btn-primary">
-                    <span class="btn-icon">→</span> commit & push
+                    <span class="btn-icon">→</span> commit &amp; push
                 </button>
             </form>
             
