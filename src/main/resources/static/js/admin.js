@@ -23,10 +23,16 @@ function showLogDetail(logId) {
     });
     event.currentTarget.classList.add('active');
     
-    fetch(`/admin/api/contact/${logId}`)
+    fetch(`/admin/api/contact/${logId}`, {
+        headers: {
+            [csrfHeader]: csrfToken
+        }
+    })
         .then(response => response.json())
         .then(log => {
             const detailContainer = document.getElementById('logDetail');
+            const csrfInput = `<input type="hidden" name="${document.querySelector('input[name="_csrf"]').name}" value="${document.querySelector('input[name="_csrf"]').value}">`;
+            
             detailContainer.innerHTML = `
                 <div class="detail-content active">
                     <div class="detail-header">
@@ -42,22 +48,23 @@ function showLogDetail(logId) {
                     
                     <div class="detail-body">
                         <h4>Message:</h4>
-                        <div class="detail-message">${log.message}</div>
+                        <div class="detail-message">${escapeHtml(log.message)}</div>
                         
                         ${log.adminReply ? `
                             <h4>Admin Reply:</h4>
-                            <div class="detail-message">${log.adminReply}</div>
+                            <div class="detail-message">${escapeHtml(log.adminReply)}</div>
                         ` : ''}
                     </div>
                     
                     <div class="detail-actions">
                         <form action="/admin/contact/${log.id}/process" method="post" style="display: inline;">
+                            ${csrfInput}
                             <button type="submit" class="btn btn-small ${log.processed ? 'btn-secondary' : 'btn-primary'}">
                                 ${log.processed ? 'Mark Unprocessed' : 'Mark Processed'}
                             </button>
                         </form>
                         
-                        <button class="btn btn-small btn-primary" onclick="showReplyModal(${log.id}, '${log.email}', '${log.name}')">
+                        <button class="btn btn-small btn-primary" onclick="showReplyModal(${log.id}, '${escapeHtml(log.email)}', '${escapeHtml(log.name)}')">
                             Send Reply
                         </button>
                     </div>
@@ -69,6 +76,12 @@ function showLogDetail(logId) {
         });
 }
 
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 function showProjectForm() {
     document.getElementById('modalTitle').textContent = 'New Project';
     document.getElementById('projectForm').reset();
@@ -77,7 +90,11 @@ function showProjectForm() {
 }
 
 function editProject(projectId) {
-    fetch(`/admin/api/project/${projectId}`)
+    fetch(`/admin/api/project/${projectId}`, {
+        headers: {
+            [csrfHeader]: csrfToken
+        }
+    })
         .then(response => response.json())
         .then(project => {
             document.getElementById('modalTitle').textContent = 'Edit Project';
@@ -116,7 +133,7 @@ function closeReplyModal() {
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('click', function(e) {
-            if (e.target === this) {
+            if (e.target === this || e.target.classList.contains('modal-backdrop')) {
                 this.classList.remove('active');
             }
         });
@@ -129,27 +146,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
-    
-    setInterval(() => {
-        if (currentTab === 'logs') {
-            const badge = document.querySelector('.tab-badge');
-            if (badge) {
-                fetch('/admin/api/stats')
-                    .then(response => response.json())
-                    .then(stats => {
-                        badge.textContent = stats.unprocessedCount;
-                        if (stats.unprocessedCount > 0) {
-                            badge.style.display = 'inline';
-                        } else {
-                            badge.style.display = 'none';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching stats:', error);
-                    });
-            }
-        }
-    }, 30000);
     
     document.getElementById('projectForm').addEventListener('submit', function(e) {
         const title = document.getElementById('projectTitle').value.trim();
