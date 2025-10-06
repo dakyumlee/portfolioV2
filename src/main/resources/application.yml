@@ -1,24 +1,22 @@
 spring:
-  application:
-    name: portfolio
-  
   datasource:
-    url: jdbc:postgresql://localhost:5432/portfolio
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/portfolio}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
-    username: postgres
-    password: postgres
   
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: true
     properties:
       hibernate:
-        format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: false
   
   flyway:
     enabled: true
+    locations: classpath:db/migration
     baseline-on-migrate: true
   
   thymeleaf:
@@ -27,19 +25,30 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${GMAIL_USERNAME:oicrcutie@gmail.com}
-    password: ${GMAIL_APP_PASSWORD:fcbaxhdasjcxpfyt}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
-denguklab:
-  admin:
-    username: ${ADMIN_USERNAME:oicrcutie}
-    password: ${ADMIN_PASSWORD:aa667788!!}
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
 
 ---
 spring:
@@ -48,17 +57,18 @@ spring:
       on-profile: prod
   
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/portfolio}
-    driver-class-name: org.postgresql.Driver
+    url: ${DATABASE_URL}
   
   jpa:
     show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
   
   thymeleaf:
     cache: false
 
 server:
   port: ${PORT:8080}
+  tomcat:
+    max-http-response-header-size: 65536
+    connection-timeout: 20000
+  compression:
+    enabled: false
