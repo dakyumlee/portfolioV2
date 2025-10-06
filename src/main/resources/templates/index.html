@@ -152,6 +152,6 @@ Ready for module execution...
         </div>
     </footer>
 
-    <script th:src="@{/js/console.js}"></script>
+    <script th:src="@{/js/console.js(v=${T(java.lang.System).currentTimeMillis()})}"></script>
 </body>
 </html>
