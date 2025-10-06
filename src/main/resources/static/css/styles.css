@@ -1,13 +1,13 @@
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
 
 :root {
-  --bg: #1C1C1E;
-  --panel: #2C2C2E;
-  --border: #3A3A3C;
+  --bg: #000000;
+  --panel: #1C1C1E;
+  --border: #38383A;
   --fg: #F5F5F7;
   --muted: #98989D;
-  --accent: #0A84FF;
-  --accent2: #409CFF;
+  --accent: #8E8E93;
+  --accent2: #AEAEB2;
   --success: #30D158;
   --danger: #FF453A;
   --warning: #FF9F0A;
@@ -76,7 +76,7 @@ code, pre, .console-output, .boot-console {
 
 .nav-link:hover {
   color: var(--fg);
-  background: rgba(10, 132, 255, 0.1);
+  background: rgba(142, 142, 147, 0.15);
 }
 
 .admin-link {
@@ -161,7 +161,7 @@ code, pre, .console-output, .boot-console {
 
 .btn-enter:hover {
   background: var(--accent);
-  color: white;
+  color: var(--bg);
 }
 
 .section-projects {
@@ -193,7 +193,7 @@ code, pre, .console-output, .boot-console {
 .project-card:hover {
   border-color: var(--accent);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(10, 132, 255, 0.2);
+  box-shadow: 0 8px 24px rgba(142, 142, 147, 0.2);
 }
 
 .card-header {
@@ -321,7 +321,7 @@ code, pre, .console-output, .boot-console {
 .form-input:focus,
 .form-textarea:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(142, 142, 147, 0.1);
 }
 
 .form-textarea {
@@ -348,7 +348,7 @@ code, pre, .console-output, .boot-console {
 .btn-primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: white;
+  color: var(--bg);
 }
 
 .btn-primary:hover {

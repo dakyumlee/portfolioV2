@@ -65,11 +65,17 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  outline: none;
+}
+
+.tab-btn:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .tab-btn.active {
   background: var(--accent);
-  color: white;
+  color: var(--bg);
 }
 
 .tab-btn:not(.active):hover {
@@ -78,7 +84,7 @@
 }
 
 .tab-badge {
-  background: white;
+  background: var(--bg);
   color: var(--accent);
   font-size: 10px;
   padding: 2px 6px;
@@ -89,8 +95,8 @@
 }
 
 .tab-btn.active .tab-badge {
-  background: rgba(255, 255, 255, 0.3);
-  color: white;
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--fg);
 }
 
 .tab-content {
@@ -173,6 +179,12 @@
   padding: 18px;
   cursor: pointer;
   transition: all 0.2s ease;
+  outline: none;
+}
+
+.log-item:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .log-item:hover {
@@ -182,7 +194,7 @@
 
 .log-item.active {
   border-color: var(--accent);
-  background: rgba(10, 132, 255, 0.05);
+  background: rgba(142, 142, 147, 0.1);
 }
 
 .log-item.unprocessed {
@@ -343,6 +355,12 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  outline: none;
+}
+
+.btn:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .btn:hover {
@@ -353,7 +371,7 @@
 .btn-primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: white;
+  color: var(--bg);
 }
 
 .btn-primary:hover {
@@ -391,7 +409,7 @@
 
 .btn-edit:hover {
   background: var(--accent);
-  color: white;
+  color: var(--bg);
 }
 
 .btn-small {
@@ -423,7 +441,7 @@
 .project-item:hover {
   border-color: var(--accent);
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(10, 132, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(142, 142, 147, 0.1);
 }
 
 .project-info {
@@ -636,6 +654,12 @@
   justify-content: center;
   border-radius: 6px;
   transition: all 0.2s ease;
+  outline: none;
+}
+
+.modal-close:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .modal-close:hover {
@@ -690,7 +714,7 @@
 .form-group input:focus,
 .form-group textarea:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(142, 142, 147, 0.1);
 }
 
 .form-group textarea {
@@ -745,6 +769,11 @@
   justify-content: flex-end;
   padding-top: 24px;
   border-top: 2px solid var(--border);
+}
+
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 @media (max-width: 768px) {

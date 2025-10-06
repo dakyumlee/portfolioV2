@@ -1,5 +1,17 @@
 let currentTab = 'logs';
 let currentLogId = null;
+let csrfToken = '';
+let csrfHeader = '';
+
+document.addEventListener('DOMContentLoaded', function() {
+    const csrfInput = document.querySelector('input[name="_csrf"]');
+    if (csrfInput) {
+        csrfToken = csrfInput.value;
+        csrfHeader = '_csrf';
+    }
+    
+    initializeAdmin();
+});
 
 function showTab(tabName) {
     document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -23,22 +35,19 @@ function showLogDetail(logId) {
     });
     event.currentTarget.classList.add('active');
     
-    fetch(`/admin/api/contact/${logId}`, {
-        headers: {
-            [csrfHeader]: csrfToken
-        }
-    })
+    fetch(`/admin/api/contact/${logId}`)
         .then(response => response.json())
         .then(log => {
             const detailContainer = document.getElementById('logDetail');
-            const csrfInput = `<input type="hidden" name="${document.querySelector('input[name="_csrf"]').name}" value="${document.querySelector('input[name="_csrf"]').value}">`;
+            const csrfInput = document.querySelector('input[name="_csrf"]');
+            const csrfHtml = csrfInput ? `<input type="hidden" name="${csrfInput.name}" value="${csrfInput.value}">` : '';
             
             detailContainer.innerHTML = `
                 <div class="detail-content active">
                     <div class="detail-header">
-                        <div class="detail-title">${log.name}</div>
+                        <div class="detail-title">${escapeHtml(log.name)}</div>
                         <div class="detail-meta">
-                            <span>Email: ${log.email}</span>
+                            <span>Email: ${escapeHtml(log.email)}</span>
                             <span>Date: ${new Date(log.createdAt).toLocaleDateString('ko-KR')}</span>
                             <span class="${log.processed ? 'status-processed' : 'status-pending'}">
                                 ${log.processed ? 'PROCESSED' : 'PENDING'}
@@ -58,7 +67,7 @@ function showLogDetail(logId) {
                     
                     <div class="detail-actions">
                         <form action="/admin/contact/${log.id}/process" method="post" style="display: inline;">
-                            ${csrfInput}
+                            ${csrfHtml}
                             <button type="submit" class="btn btn-small ${log.processed ? 'btn-secondary' : 'btn-primary'}">
                                 ${log.processed ? 'Mark Unprocessed' : 'Mark Processed'}
                             </button>
@@ -77,6 +86,7 @@ function showLogDetail(logId) {
 }
 
 function escapeHtml(text) {
+    if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
@@ -90,11 +100,7 @@ function showProjectForm() {
 }
 
 function editProject(projectId) {
-    fetch(`/admin/api/project/${projectId}`, {
-        headers: {
-            [csrfHeader]: csrfToken
-        }
-    })
+    fetch(`/admin/api/project/${projectId}`)
         .then(response => response.json())
         .then(project => {
             document.getElementById('modalTitle').textContent = 'Edit Project';
@@ -130,7 +136,7 @@ function closeReplyModal() {
     document.getElementById('replyModal').classList.remove('active');
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+function initializeAdmin() {
     document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('click', function(e) {
             if (e.target === this || e.target.classList.contains('modal-backdrop')) {
@@ -145,48 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 modal.classList.remove('active');
             });
         }
-    });
-    
-    document.getElementById('projectForm').addEventListener('submit', function(e) {
-        const title = document.getElementById('projectTitle').value.trim();
-        const summary = document.getElementById('projectSummary').value.trim();
         
-        if (!title || !summary) {
-            e.preventDefault();
-            alert('프로젝트 제목과 요약은 필수 항목입니다.');
-            return;
-        }
-    });
-    
-    let replyDraft = '';
-    const replyTextarea = document.getElementById('replyMessage');
-    if (replyTextarea) {
-        replyTextarea.addEventListener('input', function() {
-            replyDraft = this.value;
-            localStorage.setItem('adminReplyDraft', replyDraft);
-        });
-        
-        const savedDraft = localStorage.getItem('adminReplyDraft');
-        if (savedDraft) {
-            replyTextarea.value = savedDraft;
-        }
-    }
-    
-    document.getElementById('replyForm').addEventListener('submit', function() {
-        localStorage.removeItem('adminReplyDraft');
-    });
-    
-    document.querySelectorAll('.log-item').forEach(item => {
-        item.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateX(4px)';
-        });
-        
-        item.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateX(0)';
-        });
-    });
-    
-    document.addEventListener('keydown', function(e) {
         if (e.ctrlKey || e.metaKey) {
             switch(e.key) {
                 case '1':
@@ -211,14 +176,37 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    document.getElementById('projectForm').addEventListener('submit', function(e) {
+        const title = document.getElementById('projectTitle').value.trim();
+        const summary = document.getElementById('projectSummary').value.trim();
+        
+        if (!title || !summary) {
+            e.preventDefault();
+            alert('프로젝트 제목과 요약은 필수 항목입니다.');
+            return;
+        }
+    });
+    
+    const replyTextarea = document.getElementById('replyMessage');
+    if (replyTextarea) {
+        replyTextarea.addEventListener('input', function() {
+            localStorage.setItem('adminReplyDraft', this.value);
+        });
+        
+        const savedDraft = localStorage.getItem('adminReplyDraft');
+        if (savedDraft) {
+            replyTextarea.value = savedDraft;
+        }
+    }
+    
+    document.getElementById('replyForm').addEventListener('submit', function() {
+        localStorage.removeItem('adminReplyDraft');
+    });
+    
     const tabBtns = document.querySelectorAll('.tab-btn');
     tabBtns[0].title = 'Logs (Ctrl+1)';
     tabBtns[1].title = 'Projects (Ctrl+2)';
     tabBtns[2].title = 'Monitor (Ctrl+3)';
     
     showTab('logs');
-    
-    console.log('Admin console initialized. Keyboard shortcuts available:');
-    console.log('Ctrl+1: Logs, Ctrl+2: Projects, Ctrl+3: Monitor');
-    console.log('Ctrl+N: New Project (when on Projects tab)');
-});
+}
