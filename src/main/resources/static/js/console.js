@@ -1,169 +1,120 @@
-let currentSection = 'start';
+let bootSequenceComplete = false;
+
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => document.getElementById('boot-line-1').classList.add('active'), 100);
+    setTimeout(() => document.getElementById('boot-line-2').classList.add('active'), 800);
+    setTimeout(() => document.getElementById('boot-line-3').classList.add('active'), 1500);
+    setTimeout(() => {
+        document.getElementById('boot-enter').classList.add('active');
+        bootSequenceComplete = true;
+    }, 2200);
+});
 
 function enterModules() {
-    document.getElementById('projects').scrollIntoView({ 
-        behavior: 'smooth' 
-    });
-    currentSection = 'projects';
+    if (!bootSequenceComplete) return;
+    document.querySelector('.section-start').style.display = 'none';
+    document.getElementById('projects').scrollIntoView({ behavior: 'smooth' });
 }
 
 function runModule(projectId) {
-    const consoleOutput = document.getElementById('consoleOutput');
-    
-    appendToConsole('\n> loading module ' + projectId + '...');
-    
-    fetch('/api/project/' + projectId)
-        .then(response => response.text())
-        .then(data => {
+    fetch(`/api/project/${projectId}`)
+        .then(response => response.json())
+        .then(project => {
+            showProjectModal(project);
+            logToConsole(`[EXEC] Loading module: ${project.title}...`);
             setTimeout(() => {
-                appendToConsole('\n' + data);
+                logToConsole(`[INFO] ${project.title} module executed successfully`);
+                logToConsole(`[STACK] ${project.stack || 'N/A'}`);
             }, 300);
         })
-        .catch(error => {
-            appendToConsole('\n[ERROR] Failed to load module: ' + error.message);
+        .catch(err => {
+            logToConsole(`[ERROR] Failed to load module: ${err.message}`);
         });
 }
 
-function appendToConsole(text) {
-    const consoleOutput = document.getElementById('consoleOutput');
-    consoleOutput.textContent += text;
-    consoleOutput.scrollTop = consoleOutput.scrollHeight;
+function showProjectModal(project) {
+    const existingModal = document.querySelector('.project-modal');
+    if (existingModal) existingModal.remove();
+
+    const modal = document.createElement('div');
+    modal.className = 'project-modal';
+    modal.innerHTML = `
+        <div class="modal-overlay" onclick="closeProjectModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title-bar">
+                    <span class="modal-icon">▸</span>
+                    <span class="modal-title">${project.title}</span>
+                </div>
+                <button class="modal-close" onclick="closeProjectModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-section">
+                    <div class="modal-label">Description</div>
+                    <p class="modal-text">${project.description || project.summary}</p>
+                </div>
+                ${project.stack ? `
+                <div class="modal-section">
+                    <div class="modal-label">Tech Stack</div>
+                    <div class="modal-tags">
+                        ${project.stack.split(',').map(tech => 
+                            `<span class="modal-tag">${tech.trim()}</span>`
+                        ).join('')}
+                    </div>
+                </div>
+                ` : ''}
+                ${project.demoUrl ? `
+                <div class="modal-section">
+                    <div class="modal-label">Demo URL</div>
+                    <a href="${project.demoUrl}" target="_blank" class="modal-link">
+                        ${project.demoUrl} <span class="link-icon">↗</span>
+                    </a>
+                </div>
+                ` : ''}
+                ${project.repoUrl ? `
+                <div class="modal-section">
+                    <div class="modal-label">Repository</div>
+                    <a href="${project.repoUrl}" target="_blank" class="modal-link">
+                        ${project.repoUrl} <span class="link-icon">↗</span>
+                    </a>
+                </div>
+                ` : ''}
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeProjectModal()">Close</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
+function closeProjectModal() {
+    const modal = document.querySelector('.project-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => modal.remove(), 300);
+    }
+}
+
+function logToConsole(message) {
+    const output = document.getElementById('consoleOutput');
+    const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+    output.textContent += `\n[${timestamp}] ${message}`;
+    output.scrollTop = output.scrollHeight;
 }
 
 function clearConsole() {
-    const consoleOutput = document.getElementById('consoleOutput');
-    consoleOutput.textContent = 'PORTFOLIO CONSOLE v1.0.0\nReady for module execution...\n\n> _';
+    document.getElementById('consoleOutput').textContent = 'PORTFOLIO CONSOLE v1.0.0\nReady for module execution...\n\n> _';
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    const navLinks = document.querySelectorAll('.nav-link[href^="#"]');
-    
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('href');
-            const targetSection = document.querySelector(targetId);
-            
-            if (targetSection) {
-                targetSection.scrollIntoView({ 
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-                
-                currentSection = targetId.substring(1);
-            }
-        });
-    });
-    
-    setTimeout(() => {
-        const bootLines = document.querySelectorAll('.boot-line, .boot-enter');
-        bootLines.forEach((line, index) => {
-            line.style.animationDelay = (index * 0.7 + 0.5) + 's';
-        });
-    }, 100);
-    
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            clearConsole();
-        }
-        
-        if (e.key === 'Enter' && currentSection === 'start') {
-            enterModules();
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     });
-    
-    const contactSection = document.getElementById('contact');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const firstInput = entry.target.querySelector('input[name="name"]');
-                if (firstInput) {
-                    setTimeout(() => firstInput.focus(), 500);
-                }
-            }
-        });
-    });
-    
-    if (contactSection) {
-        observer.observe(contactSection);
-    }
-    
-    let typingQueue = [];
-    let isTyping = false;
-    
-    function typeText(text, element, callback) {
-        if (isTyping) {
-            typingQueue.push({ text, element, callback });
-            return;
-        }
-        
-        isTyping = true;
-        let index = 0;
-        const originalText = element.textContent;
-        
-        function typeChar() {
-            if (index < text.length) {
-                element.textContent = originalText + text.substring(0, index + 1);
-                index++;
-                setTimeout(typeChar, 20);
-            } else {
-                element.textContent = originalText + text;
-                isTyping = false;
-                if (callback) callback();
-                
-                if (typingQueue.length > 0) {
-                    const next = typingQueue.shift();
-                    typeText(next.text, next.element, next.callback);
-                }
-            }
-        }
-        
-        typeChar();
-    }
-    
-    const projectCards = document.querySelectorAll('.project-card');
-    projectCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-2px) scale(1.02)';
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) scale(1)';
-        });
-    });
-    
-    window.addEventListener('scroll', function() {
-        const scrolled = window.pageYOffset;
-        const rate = scrolled * -0.5;
-        
-        document.body.style.backgroundPosition = `0 ${rate}px`;
-    });
-    
-    if (window.location.hash) {
-        setTimeout(() => {
-            const target = document.querySelector(window.location.hash);
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth' });
-                currentSection = window.location.hash.substring(1);
-            }
-        }, 100);
-    }
-    
-    console.log(`
-    ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-    █                                      █
-    █    PORTFOLIO CONSOLE v1.0.0         █
-    █    Developer: 이다겸 (1998.05.11)    █
-    █    Type 'help' for available cmds    █
-    █                                      █
-    ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-    `);
-    
-    window.help = function() {
-        console.log('Available commands:\n- enterModules()\n- runModule(id)\n- clearConsole()');
-    };
-    
-    window.enterModules = enterModules;
-    window.runModule = runModule;
-    window.clearConsole = clearConsole;
 });
