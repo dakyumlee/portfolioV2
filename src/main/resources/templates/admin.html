@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Console - Portfolio</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/styles.css}">
     <link rel="stylesheet" th:href="@{/css/admin.css}">
 </head>
@@ -16,14 +15,16 @@
         </div>
         <div class="admin-nav">
             <a href="/" class="nav-link">← Back to Site</a>
-            <a href="/logout" class="nav-link logout">Logout</a>
+            <form th:action="@{/admin/logout}" method="post" style="display: inline;">
+                <button type="submit" class="nav-link logout" style="background: none; border: none; cursor: pointer; font: inherit;">Logout</button>
+            </form>
         </div>
     </header>
 
     <main class="admin-container">
         <div class="admin-tabs">
             <button class="tab-btn active" onclick="showTab('logs')">
-                Logs <span class="tab-badge" th:text="${unprocessedCount}">0</span>
+                Logs <span class="tab-badge" th:text="${unprocessedCount}" th:if="${unprocessedCount > 0}">0</span>
             </button>
             <button class="tab-btn" onclick="showTab('projects')">Projects</button>
             <button class="tab-btn" onclick="showTab('monitor')">Monitor</button>
@@ -68,7 +69,9 @@
         <div id="projects" class="tab-content">
             <div class="tab-header">
                 <h2>Project Management</h2>
-                <button class="btn btn-primary" onclick="showProjectForm()">+ New Project</button>
+                <button class="btn btn-primary" onclick="showProjectForm()">
+                    <span class="btn-icon">+</span> New Project
+                </button>
             </div>
 
             <div class="projects-list">
@@ -84,7 +87,7 @@
                         </div>
                     </div>
                     <div class="project-actions">
-                        <button class="btn btn-small" th:onclick="|editProject(${project.id})|">Edit</button>
+                        <button class="btn btn-small btn-edit" th:onclick="|editProject(${project.id})|">Edit</button>
                         <form th:action="@{/admin/project/{id}/delete(id=${project.id})}" method="post" style="display: inline;">
                             <button type="submit" class="btn btn-small btn-danger" onclick="return confirm('정말 삭제하시겠습니까?')">Delete</button>
                         </form>
@@ -92,6 +95,7 @@
                 </div>
                 
                 <div th:if="${#lists.isEmpty(projects)}" class="empty-state">
+                    <div class="empty-icon">📦</div>
                     <p>아직 등록된 프로젝트가 없습니다.</p>
                     <p class="empty-hint">+ New Project 버튼을 눌러 첫 프로젝트를 추가해보세요!</p>
                 </div>
@@ -105,26 +109,28 @@
             
             <div class="monitor-grid">
                 <div class="monitor-card">
+                    <div class="card-icon">📧</div>
                     <h3>Contact Statistics</h3>
                     <div class="stat-item">
-                        <span class="stat-label">Total Messages:</span>
+                        <span class="stat-label">Total Messages</span>
                         <span class="stat-value" th:text="${logs.size()}">0</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">Pending:</span>
-                        <span class="stat-value" th:text="${unprocessedCount}">0</span>
+                        <span class="stat-label">Pending</span>
+                        <span class="stat-value stat-warning" th:text="${unprocessedCount}">0</span>
                     </div>
                 </div>
                 
                 <div class="monitor-card">
+                    <div class="card-icon">🚀</div>
                     <h3>Project Statistics</h3>
                     <div class="stat-item">
-                        <span class="stat-label">Total Projects:</span>
+                        <span class="stat-label">Total Projects</span>
                         <span class="stat-value" th:text="${projects.size()}">0</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">Active:</span>
-                        <span class="stat-value" th:text="${#lists.size(projects.?[active == true])}">0</span>
+                        <span class="stat-label">Active</span>
+                        <span class="stat-value stat-success" th:text="${#lists.size(projects.?[active == true])}">0</span>
                     </div>
                 </div>
             </div>
@@ -132,55 +138,64 @@
     </main>
 
     <div id="projectModal" class="modal">
+        <div class="modal-backdrop" onclick="closeProjectModal()"></div>
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modalTitle">New Project</h3>
-                <button class="modal-close" onclick="closeProjectModal()">&times;</button>
+                <button class="modal-close" onclick="closeProjectModal()">×</button>
             </div>
             <form id="projectForm" th:action="@{/admin/project}" method="post">
                 <input type="hidden" id="projectId" name="id">
                 
-                <div class="form-group">
-                    <label>Title</label>
-                    <input type="text" id="projectTitle" name="title" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Summary</label>
-                    <input type="text" id="projectSummary" name="summary" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="projectDescription" name="description" rows="4"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>Tech Stack</label>
-                    <input type="text" id="projectStack" name="stack" placeholder="Java, Spring Boot, React...">
-                </div>
-                
-                <div class="form-group">
-                    <label>Demo URL</label>
-                    <input type="url" id="projectDemoUrl" name="demoUrl" placeholder="https://demo.example.com">
-                </div>
-                
-                <div class="form-group">
-                    <label>Repository URL</label>
-                    <input type="url" id="projectRepoUrl" name="repoUrl" placeholder="https://github.com/username/repo">
-                </div>
-                
-                <div class="form-row">
+                <div class="form-section">
                     <div class="form-group">
-                        <label>Display Order</label>
-                        <input type="number" id="projectDisplayOrder" name="displayOrder" value="0">
+                        <label>Title *</label>
+                        <input type="text" id="projectTitle" name="title" placeholder="프로젝트 이름을 입력하세요" required>
                     </div>
                     
                     <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="projectActive" name="active" checked>
-                            Active
-                        </label>
+                        <label>Summary *</label>
+                        <input type="text" id="projectSummary" name="summary" placeholder="프로젝트 한 줄 설명" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="projectDescription" name="description" rows="4" placeholder="프로젝트 상세 설명"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-group">
+                        <label>Tech Stack</label>
+                        <input type="text" id="projectStack" name="stack" placeholder="Java, Spring Boot, React...">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Demo URL</label>
+                            <input type="url" id="projectDemoUrl" name="demoUrl" placeholder="https://demo.example.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Repository URL</label>
+                            <input type="url" id="projectRepoUrl" name="repoUrl" placeholder="https://github.com/username/repo">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-row">
+                        <div class="form-group form-group-small">
+                            <label>Display Order</label>
+                            <input type="number" id="projectDisplayOrder" name="displayOrder" value="0" min="0">
+                        </div>
+                        
+                        <div class="form-group form-group-checkbox">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="projectActive" name="active" checked>
+                                <span>Active</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
                 
@@ -193,25 +208,30 @@
     </div>
 
     <div id="replyModal" class="modal">
+        <div class="modal-backdrop" onclick="closeReplyModal()"></div>
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Send Reply</h3>
-                <button class="modal-close" onclick="closeReplyModal()">&times;</button>
+                <button class="modal-close" onclick="closeReplyModal()">×</button>
             </div>
             <form id="replyForm" method="post">
-                <div class="form-group">
-                    <label>Subject</label>
-                    <input type="text" id="replySubject" name="replySubject" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Message</label>
-                    <textarea id="replyMessage" name="replyMessage" rows="6" required></textarea>
+                <div class="form-section">
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <input type="text" id="replySubject" name="replySubject" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea id="replyMessage" name="replyMessage" rows="8" required></textarea>
+                    </div>
                 </div>
                 
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeReplyModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Send Reply</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-icon">📨</span> Send Reply
+                    </button>
                 </div>
             </form>
         </div>

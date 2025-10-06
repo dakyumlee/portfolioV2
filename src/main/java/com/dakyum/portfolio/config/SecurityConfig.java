@@ -28,7 +28,6 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/admin/**").authenticated()
-                .requestMatchers("/h2-console/**").permitAll()
                 .anyRequest().permitAll()
             )
             .formLogin(form -> form
@@ -37,15 +36,11 @@ public class SecurityConfig {
                 .permitAll()
             )
             .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/")
+                .logoutUrl("/admin/logout")
+                .logoutSuccessUrl("/?logout=true")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
                 .permitAll()
-            )
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/h2-console/**")
-            )
-            .headers(headers -> headers
-                .frameOptions().disable()
             );
         
         return http.build();
