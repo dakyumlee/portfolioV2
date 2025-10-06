@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이다겸 포트폴리오 - Developer Portfolio</title>
+    <meta name="description" content="1998년생 개발자 이다겸의 포트폴리오 - 스페이스 그레이 테마">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <header class="lab-topbar">
+        <div class="lab-brand">
+            <span class="brand-icon">◉</span>
+            Dakyum Portfolio Console
+        </div>
+        <nav class="nav-menu">
+            <a href="#start" class="nav-link">Start</a>
+            <a href="#projects" class="nav-link">Projects</a>
+            <a href="#contact" class="nav-link">Contact</a>
+            <a href="#about" class="nav-link">About</a>
+            <a href="/admin" class="nav-link admin-link">Admin</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section id="start" class="section-start">
+            <div class="boot-console">
+                <div class="boot-line" id="boot-line-1">
+                    <span class="boot-prompt">[BOOT]</span> 
+                    <span class="boot-text">Initializing Portfolio Console v1.0.0...</span>
+                </div>
+                <div class="boot-line" id="boot-line-2">
+                    <span class="boot-prompt">[INIT]</span> 
+                    <span class="boot-text">Loading developer profile: 이다겸 (Lee Dakyum, 1998.05.11)</span>
+                </div>
+                <div class="boot-line" id="boot-line-3">
+                    <span class="boot-prompt">[READY]</span> 
+                    <span class="boot-text">All systems operational. Ready for exploration.</span>
+                </div>
+                <div class="boot-enter" id="boot-enter">
+                    <button class="btn-enter" onclick="enterModules()">ENTER TO OPEN MODULES</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="section-projects">
+            <h2 class="section-title">
+                <span class="title-prompt">dakyum@portfolio:~$</span> ls projects/
+            </h2>
+            
+            <div class="projects-layout">
+                <div class="projects-grid">
+                    <div th:each="project : ${projects}" class="project-card" th:onclick="|runModule(${project.id})|">
+                        <div class="card-header">
+                            <h3 class="card-title" th:text="${project.title}">Project Title</h3>
+                            <span class="card-status">●</span>
+                        </div>
+                        <p class="card-summary" th:text="${project.summary}">Project summary</p>
+                        <div class="card-stack" th:if="${project.stack}">
+                            <span class="stack-label">Stack:</span>
+                            <span class="stack-text" th:text="${project.stack}">Tech Stack</span>
+                        </div>
+                    </div>
+                    
+                    <div th:if="${#lists.isEmpty(projects)}" class="empty-state">
+                        <p>아직 등록된 프로젝트가 없습니다.</p>
+                        <p class="empty-hint">관리자 페이지에서 프로젝트를 추가해보세요!</p>
+                    </div>
+                </div>
+                
+                <div class="console-panel">
+                    <div class="console-header">
+                        <span class="console-title">Module Execution Log</span>
+                        <button class="console-clear" onclick="clearConsole()">clear</button>
+                    </div>
+                    <div class="console-output">
+                        <pre id="consoleOutput">PORTFOLIO CONSOLE v1.0.0
+Ready for module execution...
+
+> _</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="section-contact">
+            <h2 class="section-title">
+                <span class="title-prompt">dakyum@portfolio:~$</span> cat > contact.log
+            </h2>
+            
+            <form th:action="@{/contact}" method="post" class="terminal-form">
+                <div class="form-group">
+                    <label class="form-label">$ whoami</label>
+                    <input name="name" class="form-input" placeholder="Your name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">$ echo $EMAIL</label>
+                    <input name="email" type="email" class="form-input" placeholder="your.email@domain.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">$ cat message.txt</label>
+                    <textarea name="message" class="form-textarea" placeholder="프로젝트 협업, 채용 제안, 기술 문의 등 언제든지 연락주세요!" required></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-icon">→</span> commit & push
+                </button>
+            </form>
+            
+            <div class="console-feedback" th:if="${msg}">
+                <pre th:text="${msg}">[LOG] contact.log updated successfully</pre>
+            </div>
+        </section>
+
+        <section id="about" class="section-about">
+            <h2 class="section-title">
+                <span class="title-prompt">dakyum@portfolio:~$</span> cat about.md
+            </h2>
+            
+            <div class="about-content">
+                <div class="about-card">
+                    <h3>Developer Profile</h3>
+                    <ul class="profile-list">
+                        <li><strong>Name:</strong> 이다겸 (Lee Dakyum)</li>
+                        <li><strong>Born:</strong> 1998.05.11</li>
+                        <li><strong>Role:</strong> Full-stack Developer</li>
+                        <li><strong>Focus:</strong> Web Development, System Architecture</li>
+                    </ul>
+                </div>
+                
+                <div class="about-card">
+                    <h3>Tech Stack</h3>
+                    <div class="tech-grid">
+                        <span class="tech-tag">Java</span>
+                        <span class="tech-tag">Spring Boot</span>
+                        <span class="tech-tag">JavaScript</span>
+                        <span class="tech-tag">React</span>
+                        <span class="tech-tag">PostgreSQL</span>
+                        <span class="tech-tag">Docker</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="lab-footer">
+        <div class="footer-content">
+            <span>© 2025 Lee Dakyum Portfolio</span>
+            <span class="footer-separator">|</span>
+            <span>Developer: 이다겸</span>
+        </div>
+    </footer>
+
+    <script th:src="@{/js/console.js}"></script>
+</body>
+</html>

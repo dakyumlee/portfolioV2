@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Console - Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body class="admin-body">
+    <header class="admin-header">
+        <div class="admin-brand">
+            <span class="brand-icon">◉</span>
+            Dakyum Portfolio - Admin Console
+        </div>
+        <div class="admin-nav">
+            <a href="/" class="nav-link">← Back to Site</a>
+            <a href="/logout" class="nav-link logout">Logout</a>
+        </div>
+    </header>
+
+    <main class="admin-container">
+        <div class="admin-tabs">
+            <button class="tab-btn active" onclick="showTab('logs')">
+                Logs <span class="tab-badge" th:text="${unprocessedCount}">0</span>
+            </button>
+            <button class="tab-btn" onclick="showTab('projects')">Projects</button>
+            <button class="tab-btn" onclick="showTab('monitor')">Monitor</button>
+        </div>
+
+        <div id="logs" class="tab-content active">
+            <div class="tab-header">
+                <h2>Contact Logs</h2>
+                <div class="tab-actions">
+                    <span class="log-count" th:text="|Total: ${logs.size()} messages|">Total: 0 messages</span>
+                </div>
+            </div>
+
+            <div class="logs-layout">
+                <div class="logs-list">
+                    <div th:each="log : ${logs}" class="log-item" th:classappend="${log.processed} ? 'processed' : 'unprocessed'" th:onclick="|showLogDetail(${log.id})|">
+                        <div class="log-header">
+                            <span class="log-name" th:text="${log.name}">Name</span>
+                            <span class="log-date" th:text="${#temporals.format(log.createdAt, 'MM-dd HH:mm')}">Date</span>
+                        </div>
+                        <div class="log-email" th:text="${log.email}">email@example.com</div>
+                        <div class="log-preview" th:text="${#strings.abbreviate(log.message, 50)}">Message preview...</div>
+                        <div class="log-status">
+                            <span th:if="${log.processed}" class="status-processed">PROCESSED</span>
+                            <span th:unless="${log.processed}" class="status-pending">PENDING</span>
+                        </div>
+                    </div>
+                    
+                    <div th:if="${#lists.isEmpty(logs)}" class="empty-state">
+                        <p>아직 받은 메시지가 없습니다.</p>
+                    </div>
+                </div>
+
+                <div class="log-detail" id="logDetail">
+                    <div class="detail-placeholder">
+                        <span>Select a log to view details</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="projects" class="tab-content">
+            <div class="tab-header">
+                <h2>Project Management</h2>
+                <button class="btn btn-primary" onclick="showProjectForm()">+ New Project</button>
+            </div>
+
+            <div class="projects-list">
+                <div th:each="project : ${projects}" class="project-item">
+                    <div class="project-info">
+                        <h3 th:text="${project.title}">Project Title</h3>
+                        <p th:text="${project.summary}">Project summary</p>
+                        <div class="project-meta">
+                            <span class="meta-item">Order: <span th:text="${project.displayOrder}">0</span></span>
+                            <span class="meta-item" th:classappend="${project.active} ? 'active' : 'inactive'">
+                                <span th:text="${project.active} ? 'ACTIVE' : 'INACTIVE'">STATUS</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="project-actions">
+                        <button class="btn btn-small" th:onclick="|editProject(${project.id})|">Edit</button>
+                        <form th:action="@{/admin/project/{id}/delete(id=${project.id})}" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-small btn-danger" onclick="return confirm('정말 삭제하시겠습니까?')">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div th:if="${#lists.isEmpty(projects)}" class="empty-state">
+                    <p>아직 등록된 프로젝트가 없습니다.</p>
+                    <p class="empty-hint">+ New Project 버튼을 눌러 첫 프로젝트를 추가해보세요!</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="monitor" class="tab-content">
+            <div class="tab-header">
+                <h2>System Monitor</h2>
+            </div>
+            
+            <div class="monitor-grid">
+                <div class="monitor-card">
+                    <h3>Contact Statistics</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Total Messages:</span>
+                        <span class="stat-value" th:text="${logs.size()}">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Pending:</span>
+                        <span class="stat-value" th:text="${unprocessedCount}">0</span>
+                    </div>
+                </div>
+                
+                <div class="monitor-card">
+                    <h3>Project Statistics</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Total Projects:</span>
+                        <span class="stat-value" th:text="${projects.size()}">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Active:</span>
+                        <span class="stat-value" th:text="${#lists.size(projects.?[active == true])}">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">New Project</h3>
+                <button class="modal-close" onclick="closeProjectModal()">&times;</button>
+            </div>
+            <form id="projectForm" th:action="@{/admin/project}" method="post">
+                <input type="hidden" id="projectId" name="id">
+                
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="projectTitle" name="title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Summary</label>
+                    <input type="text" id="projectSummary" name="summary" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="projectDescription" name="description" rows="4"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Tech Stack</label>
+                    <input type="text" id="projectStack" name="stack" placeholder="Java, Spring Boot, React...">
+                </div>
+                
+                <div class="form-group">
+                    <label>Demo URL</label>
+                    <input type="url" id="projectDemoUrl" name="demoUrl" placeholder="https://demo.example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label>Repository URL</label>
+                    <input type="url" id="projectRepoUrl" name="repoUrl" placeholder="https://github.com/username/repo">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Display Order</label>
+                        <input type="number" id="projectDisplayOrder" name="displayOrder" value="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="projectActive" name="active" checked>
+                            Active
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeProjectModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="replyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Send Reply</h3>
+                <button class="modal-close" onclick="closeReplyModal()">&times;</button>
+            </div>
+            <form id="replyForm" method="post">
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" id="replySubject" name="replySubject" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="replyMessage" name="replyMessage" rows="6" required></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeReplyModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Send Reply</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script th:src="@{/js/admin.js}"></script>
+</body>
+</html>
