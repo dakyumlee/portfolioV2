@@ -48,9 +48,7 @@ spring:
       on-profile: prod
   
   datasource:
-    url: ${JDBC_DATABASE_URL}
-    username: ${JDBC_DATABASE_USERNAME}
-    password: ${JDBC_DATABASE_PASSWORD}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/portfolio}
     driver-class-name: org.postgresql.Driver
   
   jpa:
