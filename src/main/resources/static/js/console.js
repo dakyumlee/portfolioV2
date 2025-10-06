@@ -5,9 +5,22 @@ window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => document.getElementById('boot-line-2').classList.add('active'), 800);
     setTimeout(() => document.getElementById('boot-line-3').classList.add('active'), 1500);
     setTimeout(() => {
+        document.getElementById('boot-info').classList.add('active');
+    }, 2200);
+    setTimeout(() => {
         document.getElementById('boot-enter').classList.add('active');
         bootSequenceComplete = true;
-    }, 2200);
+    }, 2900);
+    
+    const enterBtn = document.querySelector('.btn-enter');
+    if (enterBtn) {
+        enterBtn.addEventListener('click', enterModules);
+    }
+    
+    const clearBtn = document.querySelector('.console-clear');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', clearConsole);
+    }
     
     document.querySelectorAll('.project-card[data-project-id]').forEach(card => {
         card.addEventListener('click', function() {
@@ -74,14 +87,14 @@ function showProjectModal(project) {
         repoHtml = '<div class="modal-section"><div class="modal-label">Repository</div><a href="' + project.repoUrl + '" target="_blank" class="modal-link">' + project.repoUrl + ' <span class="link-icon">↗</span></a></div>';
     }
     
-    modal.innerHTML = '<div class="modal-overlay" onclick="closeProjectModal()"></div>' +
+    modal.innerHTML = '<div class="modal-overlay"></div>' +
         '<div class="modal-content">' +
         '<div class="modal-header">' +
         '<div class="modal-title-bar">' +
         '<span class="modal-icon">▸</span>' +
         '<span class="modal-title">' + project.title + '</span>' +
         '</div>' +
-        '<button class="modal-close" onclick="closeProjectModal()">✕</button>' +
+        '<button class="modal-close">✕</button>' +
         '</div>' +
         '<div class="modal-body">' +
         '<div class="modal-section">' +
@@ -91,11 +104,16 @@ function showProjectModal(project) {
         stackHtml + demoHtml + repoHtml +
         '</div>' +
         '<div class="modal-footer">' +
-        '<button class="btn btn-secondary" onclick="closeProjectModal()">Close</button>' +
+        '<button class="btn btn-secondary">Close</button>' +
         '</div>' +
         '</div>';
     
     document.body.appendChild(modal);
+    
+    modal.querySelector('.modal-overlay').addEventListener('click', closeProjectModal);
+    modal.querySelector('.modal-close').addEventListener('click', closeProjectModal);
+    modal.querySelector('.btn-secondary').addEventListener('click', closeProjectModal);
+    
     setTimeout(() => modal.classList.add('active'), 10);
 }
 
