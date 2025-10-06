@@ -62,6 +62,6 @@ public class MainController {
         }
         
         redirectAttributes.addFlashAttribute("msg", "[SUCCESS] Message sent successfully! I'll get back to you soon.");
-        return "redirect:/#contact";
+        return "redirect:/";
     }
 }
