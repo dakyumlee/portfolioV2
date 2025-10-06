@@ -56,6 +56,9 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  
+  thymeleaf:
+    cache: false
 
 server:
   port: ${PORT:8080}
