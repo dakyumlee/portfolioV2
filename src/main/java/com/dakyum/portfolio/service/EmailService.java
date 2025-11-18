@@ -1,13 +1,14 @@
 package com.dakyum.portfolio.service;
 
-import com.resend.Resend;
-import com.resend.core.exception.ResendException;
-import com.resend.services.emails.model.CreateEmailOptions;
-import com.resend.services.emails.model.CreateEmailResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import com.resend.Resend;
+import com.resend.core.exception.ResendException;
+import com.resend.services.emails.model.CreateEmailOptions;
+import com.resend.services.emails.model.CreateEmailResponse;
 
 @Service
 public class EmailService {
@@ -23,7 +24,7 @@ public class EmailService {
     public void sendContactNotification(String name, String email, String message) {
         try {
             CreateEmailOptions params = CreateEmailOptions.builder()
-                .from("onboarding@resend.dev")
+                .from("oicrcutie@gmail.com")
                 .to("oicrcutie@gmail.com")
                 .subject("[Portfolio Contact] " + name)
                 .html("<p><strong>Name:</strong> " + name + "</p>" +
@@ -43,7 +44,7 @@ public class EmailService {
     public void sendReply(String to, String subject, String text) {
         try {
             CreateEmailOptions params = CreateEmailOptions.builder()
-                .from("onboarding@resend.dev")
+                .from("oicrcutie@gmail.com")
                 .to(to)
                 .subject(subject)
                 .html("<p>" + text.replace("\n", "<br>") + "</p>")
