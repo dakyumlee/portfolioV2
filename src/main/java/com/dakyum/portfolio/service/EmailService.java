@@ -26,7 +26,7 @@ public class EmailService {
             CreateEmailOptions params = CreateEmailOptions.builder()
                 .from("onboarding@resend.dev")
                 .to("oicrcutie@gmail.com")
-                .replyTo("oicrcutie@gmail.com")
+                .replyTo(email)
                 .subject("[Portfolio Contact] " + name)
                 .html("<p><strong>Name:</strong> " + name + "</p>" +
                         "<p><strong>Email:</strong> " + email + "</p>" +
