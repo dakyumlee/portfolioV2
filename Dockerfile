@@ -6,12 +6,10 @@ COPY gradlew ./
 RUN chmod +x gradlew
 COPY src src
 RUN ./gradlew clean bootJar -x test --no-daemon
-RUN ls -la build/libs/
 
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar
-RUN ls -la
 ENV SPRING_PROFILES_ACTIVE=prod
 EXPOSE 8080
-CMD ["java", "-Dserver.port=${PORT:-8080}", "-jar", "app.jar"]
+CMD java -Dserver.port=${PORT} -jar app.jar
