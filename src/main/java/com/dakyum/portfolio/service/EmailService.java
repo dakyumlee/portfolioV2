@@ -24,8 +24,9 @@ public class EmailService {
     public void sendContactNotification(String name, String email, String message) {
         try {
             CreateEmailOptions params = CreateEmailOptions.builder()
-                .from("oicrcutie@gmail.com")
+                .from("onboarding@resend.dev")
                 .to("oicrcutie@gmail.com")
+                .replyTo("oicrcutie@gmail.com")
                 .subject("[Portfolio Contact] " + name)
                 .html("<p><strong>Name:</strong> " + name + "</p>" +
                         "<p><strong>Email:</strong> " + email + "</p>" +
@@ -44,8 +45,9 @@ public class EmailService {
     public void sendReply(String to, String subject, String text) {
         try {
             CreateEmailOptions params = CreateEmailOptions.builder()
-                .from("oicrcutie@gmail.com")
+                .from("onboarding@resend.dev")
                 .to(to)
+                .replyTo("oicrcutie@gmail.com")
                 .subject(subject)
                 .html("<p>" + text.replace("\n", "<br>") + "</p>")
                 .build();
