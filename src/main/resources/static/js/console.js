@@ -135,3 +135,7 @@ function logToConsole(message) {
 function clearConsole() {
     document.getElementById('consoleOutput').textContent = 'PORTFOLIO CONSOLE v1.0.0\nReady for module execution...\n\n> _';
 }
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}

@@ -1033,3 +1033,55 @@ code, pre, .console-output, .boot-console {
   width: 16px;
   height: 16px;
 }
+
+@media (max-width: 480px) {
+  .console-header {
+    padding: 8px 12px;
+  }
+  
+  .nav-menu {
+    gap: 4px;
+  }
+  
+  .nav-link {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+  
+  .container {
+    padding: 60px 12px 12px;
+  }
+  
+  .section-title {
+    font-size: 16px;
+  }
+  
+  .projects-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .console-output {
+    display: none;
+  }
+  
+  .contact-form {
+    padding: 16px;
+  }
+  
+  .form-group {
+    margin-bottom: 12px;
+  }
+  
+  .about-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .hero-section {
+    padding: 20px 16px;
+  }
+  
+  .modal-content {
+    margin: 10px;
+    max-width: calc(100% - 20px);
+  }
+}
